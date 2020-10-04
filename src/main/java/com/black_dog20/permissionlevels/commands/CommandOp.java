@@ -15,6 +15,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.OpEntry;
 import net.minecraft.server.management.OpList;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collection;
@@ -71,7 +72,7 @@ public class CommandOp {
             if (!playerlist.canSendCommands(gameprofile) || playerlist.getServer().getPermissionLevel(gameprofile) != level) {
                 addOp(playerlist, gameprofile, level);
                 ++i;
-                context.getSource().sendFeedback(new TranslationTextComponent("permissionlevels.commands.op.success", gameprofile.getName(), level), true);
+                context.getSource().sendFeedback(new StringTextComponent(String.format("Made %s a server operator with permission level %d", gameprofile.getName(), level)), true);
             }
         }
 
