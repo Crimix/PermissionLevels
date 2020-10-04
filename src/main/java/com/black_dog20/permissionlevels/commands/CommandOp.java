@@ -43,7 +43,7 @@ public class CommandOp {
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
                         .executes(CommandOp::executeLevel))));
 
-     dispatcher.register(Commands.literal("xop")
+        dispatcher.register(Commands.literal("xop")
                         .requires(source -> source.hasPermissionLevel(3))
                         .then(Commands.argument("targets", GameProfileArgument.gameProfile())
                                 .suggests(SUGGESTIONS_PROVIDER)
