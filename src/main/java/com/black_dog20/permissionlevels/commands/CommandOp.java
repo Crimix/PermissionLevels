@@ -20,11 +20,13 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collection;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class CommandOp {
 
     private static final SimpleCommandExceptionType ALREADY_OP = new SimpleCommandExceptionType(new TranslationTextComponent("commands.op.failed"));
+    private static final SimpleCommandExceptionType LEVEL_TOO_HIGH = new SimpleCommandExceptionType(new StringTextComponent("Cannot op player to higher level than your level"));
 
     public static final SuggestionProvider<CommandSource> SUGGESTIONS_PROVIDER = (context, suggestionsBuilder) -> {
         PlayerList playerlist = context.getSource().getServer().getPlayerList();
@@ -34,6 +36,13 @@ public class CommandOp {
         return ISuggestionProvider.suggest(playerNames, suggestionsBuilder);
     };
 
+    public static final SuggestionProvider<CommandSource> LEVEL_SUGGESTIONS_PROVIDER = (context, suggestionsBuilder) -> {
+        int level = context.getSource().permissionLevel;
+        Stream<String> levels = IntStream.rangeClosed(1, level)
+                .mapToObj(Integer::toString);
+        return ISuggestionProvider.suggest(levels, suggestionsBuilder);
+    };
+
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("op")
                 .requires(source -> source.hasPermissionLevel(3))
@@ -41,6 +50,7 @@ public class CommandOp {
                         .suggests(SUGGESTIONS_PROVIDER)
                         .executes(CommandOp::execute)
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
+                        .suggests(LEVEL_SUGGESTIONS_PROVIDER)
                         .executes(CommandOp::executeLevel))));
 
         dispatcher.register(Commands.literal("xop")
@@ -49,19 +59,27 @@ public class CommandOp {
                         .suggests(SUGGESTIONS_PROVIDER)
                         .executes(CommandOp::execute))
                  .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
+                         .suggests(LEVEL_SUGGESTIONS_PROVIDER)
                         .executes(CommandOp::executeLevel)));
     }
 
     public static int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
         PlayerList playerlist = context.getSource().getServer().getPlayerList();
         Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
-        return baseExecute(context, playerlist, gameProfiles, playerlist.getServer().getOpPermissionLevel());
+        int serverOpLevel = playerlist.getServer().getOpPermissionLevel();
+        int commandOpLevel = context.getSource().permissionLevel;
+        int level = Math.min(serverOpLevel, commandOpLevel);
+        return baseExecute(context, playerlist, gameProfiles, level);
     }
 
     public static int executeLevel(CommandContext<CommandSource> context) throws CommandSyntaxException {
         PlayerList playerlist = context.getSource().getServer().getPlayerList();
         Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
         int level = IntegerArgumentType.getInteger(context, "level");
+        int commandOpLevel = context.getSource().permissionLevel;
+        if(level > commandOpLevel) {
+            throw LEVEL_TOO_HIGH.create();
+        }
         return baseExecute(context, playerlist, gameProfiles, level);
     }
 

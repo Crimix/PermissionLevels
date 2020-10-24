@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.black_dog20.permissionlevels.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "permissionlevels.refmap.json",
+  "mixins": [
+    "OpCommandMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
