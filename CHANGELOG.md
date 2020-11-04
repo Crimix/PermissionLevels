@@ -1,6 +1,10 @@
 # Permission Levels Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.16.4, 1.0.1-b1] - 2020-11-04
+- Port to 1.16.4
+- Will be in beta until some more Forge updates and mappings have been released.
+
 ## [1.16.3, 1.0.1] - 2020-10-04
 - Using Mixins to disable Vanilla /op command, such that this mod makes a complete override of the /op command
 - Changed such that a op cannot assign a higher op level to a player than the level of the op executing the command.
