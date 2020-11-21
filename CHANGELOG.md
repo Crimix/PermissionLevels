@@ -1,6 +1,9 @@
 # Permission Levels Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.16.4, 1.0.1] - 2020-11-21
+- Full stable release
+
 ## [1.16.4, 1.0.1-b1] - 2020-11-04
 - Port to 1.16.4
 - Will be in beta until some more Forge updates and mappings have been released.
