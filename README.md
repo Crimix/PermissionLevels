@@ -1,6 +1,5 @@
-# PermissionLevels
-
-[![](http://cf.way2muchnoise.eu/full_permission-levels_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/permission-levels)
+[![](http://cf.way2muchnoise.eu/full_410110_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/permission-levels)
+[![](http://cf.way2muchnoise.eu/versions/410110.svg)](https://www.curseforge.com/minecraft/mc-mods/permission-levels)
 # Permission Levels
 [Permission Levels](https://www.curseforge.com/minecraft/mc-mods/permission-levels) is a mod made to help control ops and what they can do.  
 
