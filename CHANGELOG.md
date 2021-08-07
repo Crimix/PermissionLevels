@@ -1,6 +1,11 @@
 # Permission Levels Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.17.1, 1.0.1-b1] - 2021-08-xx
+- Port to 1.17.1
+- Will be in beta until full Forge release, expect things to break
+- Made translations possible and added default translations for clients without the mod
+
 ## [1.16.4, 1.0.1] - 2020-11-21
 - Full stable release
 

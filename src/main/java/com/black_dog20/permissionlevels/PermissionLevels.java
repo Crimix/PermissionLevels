@@ -2,15 +2,15 @@ package com.black_dog20.permissionlevels;
 
 import com.black_dog20.permissionlevels.commands.CommandOp;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.command.Commands;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.commands.Commands;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +22,7 @@ public class PermissionLevels
 
     public static final String MOD_ID = "permissionlevels";
     private static final Logger LOGGER = LogManager.getLogger();
-    private Set<Commands.EnvironmentType> environmentTypeSet = ImmutableSet.of(Commands.EnvironmentType.ALL, Commands.EnvironmentType.DEDICATED);
+    private Set<Commands.CommandSelection> environmentTypeSet = ImmutableSet.of(Commands.CommandSelection.ALL, Commands.CommandSelection.DEDICATED);
 
     public PermissionLevels() {
         MinecraftForge.EVENT_BUS.register(this);
