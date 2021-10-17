@@ -1,0 +1,4 @@
+{
+  "permissionlevels.command.op.level_too_high": "Cannot op player to higher level than your level",
+  "permissionlevels.command.op.opped_with_level": "Made %s a server operator with permission level %d"
+}

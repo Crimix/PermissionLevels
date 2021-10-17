@@ -162,5 +162,5 @@ gradle-app.setting
 **/build/
 
 # End of https://www.gitignore.io/api/gradle,eclipse,intellij,forgegradle
-/private.properties
+/gradle-local.properties
 /logs/
