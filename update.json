@@ -20,6 +20,9 @@
   "1.18": {
     "1.0.1": "https://github.com/Crimix/bml/blob/1.18/CHANGELOG.md"
   },
+  "1.18.1": {
+    "1.0.1": "https://github.com/Crimix/bml/blob/1.18/CHANGELOG.md"
+  },
   "promos": {
     "1.15.2-latest": "1.0.0",
     "1.15.2-recommended": "1.0.0",
@@ -32,6 +35,8 @@
     "1.17.1-latest": "1.0.1",
     "1.17.1-recommended": "1.0.1",
     "1.18-latest": "1.0.1",
-    "1.18-recommended": "1.0.1"
+    "1.18-recommended": "1.0.1",
+    "1.18.1-latest": "1.0.1",
+    "1.18.1-recommended": "1.0.1"
   }
 }
