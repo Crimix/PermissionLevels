@@ -1,14 +1,14 @@
 modLoader="javafml"
-loaderVersion="[38,)"
+loaderVersion="${loader_version_range}"
 issueTrackerURL="https://github.com/Crimix/PermissionLevels/issues"
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
 license="All rights reserved"
 
 [[mods]]
 modId="permissionlevels"
-version="${file.jarVersion}"
+version="${version}"
 displayName="Permission Levels"
-updateJSONURL="https://raw.githubusercontent.com/Crimix/PermissionLevels/1.18/update.json"
+updateJSONURL="${update_url}"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/permission-levels"
 logoFile="permissionlevels-logo.png"
 credits="To all my friends for putting up with me breaking the server multiple times during testing"
@@ -18,12 +18,12 @@ description='''Control the ops'''
 [[dependencies.permissionlevels]]
     modId="forge"
     mandatory=true
-    versionRange="[38.0.17,)"
+    versionRange="${forge_version_range}"
     ordering="NONE"
     side="BOTH"
 [[dependencies.permissionlevels]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18,1.19)"
+    versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="SERVER"
