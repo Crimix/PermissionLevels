@@ -193,6 +193,16 @@ curseforge {
     }
 }
 
+modrinth {
+    token = modrinth_token
+    projectId = "liHwiCTl"
+    uploadFile = jar
+    changelog = 'As always find the changelog here [CHANGELOG](https://github.com/Crimix/PermissionLevels/blob/1.18/CHANGELOG.md)'
+    versionType = "release"
+    loaders = ["forge"]
+    gameVersions = ["1.18.2"]
+}
+
 mixin {
     add sourceSets.main, "permissionlevels.refmap.json"
     config "permissionlevels.mixins.json"
