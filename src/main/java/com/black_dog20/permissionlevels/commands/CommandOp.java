@@ -14,7 +14,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpList;
@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 public class CommandOp {
 
-    private static final SimpleCommandExceptionType ALREADY_OP = new SimpleCommandExceptionType(new TranslatableComponent("commands.op.failed"));
+    private static final SimpleCommandExceptionType ALREADY_OP = new SimpleCommandExceptionType(Component.translatable("commands.op.failed"));
 
     public static final SuggestionProvider<CommandSourceStack> SUGGESTIONS_PROVIDER = (context, suggestionsBuilder) -> {
         PlayerList playerlist = context.getSource().getServer().getPlayerList();
