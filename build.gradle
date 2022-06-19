@@ -197,6 +197,7 @@ modrinth {
     token = modrinth_token
     projectId = "liHwiCTl"
     uploadFile = jar
+    versionNumber = "${mc_version}-${version}"
     changelog = "As always find the changelog here [CHANGELOG](${changelog_url})"
     versionType = "release"
     loaders = ["forge"]
