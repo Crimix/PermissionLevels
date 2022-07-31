@@ -30,7 +30,7 @@ public class PermissionLevels
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onCommandRegister(RegisterCommandsEvent event) {
-        if (environmentTypeSet.contains(event.getEnvironment())) {
+        if (environmentTypeSet.contains(event.getCommandSelection())) {
             CommandOp.register(event.getDispatcher());
         }
     }
