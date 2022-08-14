@@ -71,6 +71,12 @@ minecraft {
             }
         }
 
+        dev {
+            parent runs.client
+            taskName 'runDev'
+            args '--username', 'Dev2'
+        }
+
         server {
             workingDirectory project.file('run')
             arg "-mixin.config=permissionlevels.mixins.json"

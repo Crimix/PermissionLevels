@@ -5,7 +5,9 @@ import com.black_dog20.permissionlevels.PermissionLevels;
 import com.black_dog20.permissionlevels.utils.Translations;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -25,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -48,54 +51,59 @@ public class CommandOp {
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("op")
+        dispatcher.register(getBuilder("op"));
+        dispatcher.register(getBuilder("xop"));
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> getBuilder(String literal) {
+        return Commands.literal(literal)
                 .requires(source -> source.hasPermission(3))
                 .then(Commands.argument("targets", GameProfileArgument.gameProfile())
                         .suggests(SUGGESTIONS_PROVIDER)
                         .executes(CommandOp::execute)
-                .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
-                        .suggests(LEVEL_SUGGESTIONS_PROVIDER)
-                        .executes(CommandOp::executeLevel))));
-
-        dispatcher.register(Commands.literal("xop")
-                 .requires(source -> source.hasPermission(3))
-                 .then(Commands.argument("targets", GameProfileArgument.gameProfile())
-                        .suggests(SUGGESTIONS_PROVIDER)
-                        .executes(CommandOp::execute))
-                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
-                         .suggests(LEVEL_SUGGESTIONS_PROVIDER)
-                        .executes(CommandOp::executeLevel)));
+                        .then(Commands.argument("bypassPlayerLimit", BoolArgumentType.bool())
+                                .executes(CommandOp::execute))
+                        .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
+                                .suggests(LEVEL_SUGGESTIONS_PROVIDER)
+                                .executes(CommandOp::executeLevel)
+                                .then(Commands.argument("bypassPlayerLimit", BoolArgumentType.bool())
+                                        .executes(CommandOp::executeLevel))));
     }
 
-    public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         PlayerList playerlist = context.getSource().getServer().getPlayerList();
-        Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
         int serverOpLevel = playerlist.getServer().getOperatorUserPermissionLevel();
         int commandOpLevel = context.getSource().permissionLevel;
         int level = Math.min(serverOpLevel, commandOpLevel);
-        return baseExecute(context, playerlist, gameProfiles, level);
+        return baseExecute(context, level);
     }
 
-    public static int executeLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        PlayerList playerlist = context.getSource().getServer().getPlayerList();
-        Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
+    private static int executeLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         int level = IntegerArgumentType.getInteger(context, "level");
         int commandOpLevel = context.getSource().permissionLevel;
         if(level > commandOpLevel) {
             throw getLevelTooHigh(context).create();
         }
-        return baseExecute(context, playerlist, gameProfiles, level);
+        return baseExecute(context,  level);
     }
 
-    private static int baseExecute(CommandContext<CommandSourceStack> context, PlayerList playerlist, Collection<GameProfile> gameProfiles, int level) throws CommandSyntaxException {
+    private static int baseExecute(CommandContext<CommandSourceStack> context, int level) throws CommandSyntaxException {
+        PlayerList playerlist = context.getSource().getServer().getPlayerList();
+        Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
+        Optional<Boolean> optionalBypassPlayerLimit = getArgument(() -> BoolArgumentType.getBool(context, "bypassPlayerLimit"));
         int i = 0;
 
         for(GameProfile gameprofile : gameProfiles) {
-            if (!playerlist.isOp(gameprofile) || playerlist.getServer().getProfilePermissions(gameprofile) != level) {
+            boolean bypassPlayerLimit = optionalBypassPlayerLimit.orElseGet(() -> playerlist.canBypassPlayerLimit(gameprofile));
+            if (!playerlist.isOp(gameprofile) || playerlist.getServer().getProfilePermissions(gameprofile) != level || (playerlist.canBypassPlayerLimit(gameprofile) != bypassPlayerLimit)) {
                 ServerPlayer serverPlayerEntity = playerlist.getPlayer(gameprofile.getId());
-                addOp(playerlist, gameprofile, level);
+                addOp(playerlist, gameprofile, level, bypassPlayerLimit);
                 ++i;
-                context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
+                if (bypassPlayerLimit && !playerlist.canBypassPlayerLimit(gameprofile)) {
+                    context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL_BYPASS.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
+                } else {
+                    context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
+                }
             }
         }
 
@@ -106,9 +114,9 @@ public class CommandOp {
         }
     }
 
-    public static void addOp(PlayerList playerList, GameProfile profile, int level) {
+    private static void addOp(PlayerList playerList, GameProfile profile, int level, boolean bypassPlayerLimit) {
         ServerOpList ops = playerList.getOps();
-        ops.add(new ServerOpListEntry(profile, level, ops.canBypassPlayerLimit(profile)));
+        ops.add(new ServerOpListEntry(profile, level, bypassPlayerLimit));
         ServerPlayer serverPlayerEntity = playerList.getPlayer(profile.getId());
         if (serverPlayerEntity != null) {
             playerList.sendPlayerPermissionLevel(serverPlayerEntity);
@@ -143,5 +151,13 @@ public class CommandOp {
                 .orElse(false);
 
         return new SimpleCommandExceptionType(TranslationUtil.createPossibleEagerTranslation(Translations.LEVEL_TOO_HIGH.get(), translateOnClient));
+    }
+
+    private static <V> Optional<V> getArgument(Supplier<V> optionalFunction) {
+        try {
+            return Optional.of(optionalFunction.get());
+        } catch (IllegalArgumentException ignored) {
+            return Optional.empty();
+        }
     }
 }
