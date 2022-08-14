@@ -71,6 +71,12 @@ minecraft {
             }
         }
 
+        dev {
+            parent runs.client
+            taskName 'runDev'
+            args '--username', 'Dev2'
+        }
+
         server {
             workingDirectory project.file('run')
             arg "-mixin.config=permissionlevels.mixins.json"
@@ -197,6 +203,7 @@ modrinth {
     token = modrinth_token
     projectId = "liHwiCTl"
     uploadFile = jar
+    versionNumber = "${mc_version}-${version}"
     changelog = 'As always find the changelog here [CHANGELOG](https://github.com/Crimix/PermissionLevels/blob/1.18/CHANGELOG.md)'
     versionType = "release"
     loaders = ["forge"]

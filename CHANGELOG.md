@@ -1,6 +1,10 @@
 # Permission Levels Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.18.2, 1.0.3] - 2022-08-14
+- Added option to set `bypassPlayerLimit` when using the `op` or `xop` command.
+- Added another command `bypassPlayerLimit` that directly sets if an op is allowed to bypass the player limit.
+
 ## [1.18.2, 1.0.2] - 2021-04-03
 - Port to 1.18.2 may be a bit unstable as Forge 1.18.2 is in beta
 
