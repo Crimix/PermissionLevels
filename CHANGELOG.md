@@ -1,6 +1,10 @@
 # Permission Levels Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.17.1, 1.0.2] - 2022-08-14
+- Added option to set `bypassPlayerLimit` when using the `op` or `xop` command.
+- Added another command `bypassPlayerLimit` that directly sets if an op is allowed to bypass the player limit.
+
 ## [1.17.1, 1.0.1] - 2021-12-11
 - Port to 1.17.1
 - Made translations possible and added default translations for clients without the mod
