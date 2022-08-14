@@ -1,44 +1,32 @@
 buildscript {
     repositories {
-        jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url='https://dist.creeper.host/Sponge/maven'
-        }
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url='https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath "net.saliman:gradle-properties-plugin:1.5.1"
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'com.matthewprenger.cursegradle'
+apply plugin: net.saliman.gradle.plugin.properties.PropertiesPlugin
 apply plugin: 'idea'
-
-ext.priv = parseConfig(file('private.properties'))
 
 version = version_major + '.' + version_minor + '.' + version_patch
 group = "${mod_group}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = mod_archivesBaseName + "-" + mc_version
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so we should target Java 8.
 
 sourceSets {
     main.resources.srcDirs += 'src/main/generated_resources'
 }
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
     mappings channel: 'snapshot', version: "${mcp_mappings}"
@@ -64,6 +52,12 @@ minecraft {
                     source sourceSets.main
                 }
             }
+        }
+
+        dev {
+            parent runs.client
+            taskName 'runDev'
+            args '--username', 'Dev2'
         }
 
         server {
@@ -104,7 +98,6 @@ minecraft {
 }
 
 repositories {
-    jcenter()
     mavenCentral()
     maven {
         // location of the maven that hosts JEI files
@@ -158,7 +151,7 @@ jar {
 }
 
 curseforge {
-    apiKey = priv.apiKey
+    apiKey = curse_apiKey
     project {
         id = '410110'
         changelogType = 'markdown'
@@ -166,15 +159,7 @@ curseforge {
         releaseType = 'release'
         addGameVersion 'Forge'
         addGameVersion 'Java 8'
-        addGameVersion '1.16.4'
-    }
-}
-
-def parseConfig(File config) {
-    config.withReader {
-        def prop = new Properties()
-        prop.load(it)
-        return (new ConfigSlurper().parse(prop))
+        addGameVersion '1.16.5'
     }
 }
 

@@ -2,7 +2,9 @@ package com.black_dog20.permissionlevels.commands;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -19,7 +21,9 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -44,53 +48,59 @@ public class CommandOp {
     };
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        dispatcher.register(Commands.literal("op")
+        dispatcher.register(getBuilder("op"));
+        dispatcher.register(getBuilder("xop"));
+    }
+
+    private static LiteralArgumentBuilder<CommandSource> getBuilder(String literal) {
+        return Commands.literal(literal)
                 .requires(source -> source.hasPermissionLevel(3))
                 .then(Commands.argument("targets", GameProfileArgument.gameProfile())
                         .suggests(SUGGESTIONS_PROVIDER)
                         .executes(CommandOp::execute)
-                .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
-                        .suggests(LEVEL_SUGGESTIONS_PROVIDER)
-                        .executes(CommandOp::executeLevel))));
-
-        dispatcher.register(Commands.literal("xop")
-                 .requires(source -> source.hasPermissionLevel(3))
-                 .then(Commands.argument("targets", GameProfileArgument.gameProfile())
-                        .suggests(SUGGESTIONS_PROVIDER)
-                        .executes(CommandOp::execute))
-                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
-                         .suggests(LEVEL_SUGGESTIONS_PROVIDER)
-                        .executes(CommandOp::executeLevel)));
+                        .then(Commands.argument("bypassPlayerLimit", BoolArgumentType.bool())
+                                .executes(CommandOp::execute))
+                        .then(Commands.argument("level", IntegerArgumentType.integer(1, 4))
+                                .suggests(LEVEL_SUGGESTIONS_PROVIDER)
+                                .executes(CommandOp::executeLevel)
+                                .then(Commands.argument("bypassPlayerLimit", BoolArgumentType.bool())
+                                        .executes(CommandOp::executeLevel))));
     }
 
     public static int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
         PlayerList playerlist = context.getSource().getServer().getPlayerList();
-        Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
         int serverOpLevel = playerlist.getServer().getOpPermissionLevel();
         int commandOpLevel = context.getSource().permissionLevel;
         int level = Math.min(serverOpLevel, commandOpLevel);
-        return baseExecute(context, playerlist, gameProfiles, level);
+        return baseExecute(context, level);
     }
 
     public static int executeLevel(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        PlayerList playerlist = context.getSource().getServer().getPlayerList();
-        Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
         int level = IntegerArgumentType.getInteger(context, "level");
         int commandOpLevel = context.getSource().permissionLevel;
         if(level > commandOpLevel) {
             throw LEVEL_TOO_HIGH.create();
         }
-        return baseExecute(context, playerlist, gameProfiles, level);
+        return baseExecute(context, level);
     }
 
-    private static int baseExecute(CommandContext<CommandSource> context, PlayerList playerlist, Collection<GameProfile> gameProfiles, int level) throws CommandSyntaxException {
+    private static int baseExecute(CommandContext<CommandSource> context, int level) throws CommandSyntaxException {
+        PlayerList playerlist = context.getSource().getServer().getPlayerList();
+        Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context, "targets");
+        Optional<Boolean> optionalBypassPlayerLimit = getArgument(() -> BoolArgumentType.getBool(context, "bypassPlayerLimit"));
         int i = 0;
 
         for(GameProfile gameprofile : gameProfiles) {
-            if (!playerlist.canSendCommands(gameprofile) || playerlist.getServer().getPermissionLevel(gameprofile) != level) {
-                addOp(playerlist, gameprofile, level);
+            boolean bypassPlayerLimitBefore = playerlist.bypassesPlayerLimit(gameprofile);
+            boolean bypassPlayerLimit = optionalBypassPlayerLimit.orElseGet(() -> bypassPlayerLimitBefore);
+            if (!playerlist.canSendCommands(gameprofile) || playerlist.getServer().getPermissionLevel(gameprofile) != level || (bypassPlayerLimitBefore != bypassPlayerLimit)) {
+                addOp(playerlist, gameprofile, level, bypassPlayerLimit);
                 ++i;
-                context.getSource().sendFeedback(new StringTextComponent(String.format("Made %s a server operator with permission level %d", gameprofile.getName(), level)), true);
+                if (bypassPlayerLimit && !bypassPlayerLimitBefore) {
+                    context.getSource().sendFeedback(new StringTextComponent(String.format("Made %s a server operator with permission level %d and allowed to bypass player limit", gameprofile.getName(), level)), true);
+                } else {
+                    context.getSource().sendFeedback(new StringTextComponent(String.format("Made %s a server operator with permission level %d", gameprofile.getName(), level)), true);
+                }
             }
         }
 
@@ -101,9 +111,9 @@ public class CommandOp {
         }
     }
 
-    public static void addOp(PlayerList playerList, GameProfile profile, int level) {
+    public static void addOp(PlayerList playerList, GameProfile profile, int level, boolean bypassPlayerLimit) {
         OpList ops = playerList.getOppedPlayers();
-        ops.addEntry(new OpEntry(profile, level, ops.bypassesPlayerLimit(profile)));
+        ops.addEntry(new OpEntry(profile, level, bypassPlayerLimit));
         ServerPlayerEntity serverPlayerEntity = playerList.getPlayerByUUID(profile.getId());
         if (serverPlayerEntity != null) {
             playerList.updatePermissionLevel(serverPlayerEntity);
@@ -116,5 +126,13 @@ public class CommandOp {
 
     private static String getName(ServerPlayerEntity player) {
         return player.getGameProfile().getName();
+    }
+
+    private static <V> Optional<V> getArgument(Supplier<V> optionalFunction) {
+        try {
+            return Optional.of(optionalFunction.get());
+        } catch (IllegalArgumentException ignored) {
+            return Optional.empty();
+        }
     }
 }
