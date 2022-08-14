@@ -94,12 +94,13 @@ public class CommandOp {
         int i = 0;
 
         for(GameProfile gameprofile : gameProfiles) {
-            boolean bypassPlayerLimit = optionalBypassPlayerLimit.orElseGet(() -> playerlist.canBypassPlayerLimit(gameprofile));
-            if (!playerlist.isOp(gameprofile) || playerlist.getServer().getProfilePermissions(gameprofile) != level || (playerlist.canBypassPlayerLimit(gameprofile) != bypassPlayerLimit)) {
+            boolean bypassPlayerLimitBefore = playerlist.canBypassPlayerLimit(gameprofile);
+            boolean bypassPlayerLimit = optionalBypassPlayerLimit.orElse(bypassPlayerLimitBefore);
+            if (!playerlist.isOp(gameprofile) || playerlist.getServer().getProfilePermissions(gameprofile) != level || (bypassPlayerLimitBefore != bypassPlayerLimit)) {
                 ServerPlayer serverPlayerEntity = playerlist.getPlayer(gameprofile.getId());
                 addOp(playerlist, gameprofile, level, bypassPlayerLimit);
                 ++i;
-                if (bypassPlayerLimit && !playerlist.canBypassPlayerLimit(gameprofile)) {
+                if (bypassPlayerLimit && !bypassPlayerLimitBefore) {
                     context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL_BYPASS.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
                 } else {
                     context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
