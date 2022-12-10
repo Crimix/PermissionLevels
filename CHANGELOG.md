@@ -1,6 +1,9 @@
 # Permission Levels Changelog
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.19.3, 1.0.5] - 2022-12-10
+- Port to 1.19.3
+
 ## [1.19, 1.0.5] - 2022-08-14
 - Fixed issue with feedback message when using the`bypassPlayerLimit` option
 
