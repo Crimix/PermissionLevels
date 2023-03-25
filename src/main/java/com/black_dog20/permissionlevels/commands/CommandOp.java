@@ -143,7 +143,7 @@ public class CommandOp {
     }
 
     private static boolean isModPresent(@Nullable ServerPlayer client) {
-        return client != null && PermissionLevels.NETWORK.isRemotePresent(client.connection.getConnection());
+        return client != null && PermissionLevels.NETWORK.isRemotePresent(client.connection.connection);
     }
 
     private static SimpleCommandExceptionType getLevelTooHigh(CommandContext<CommandSourceStack> context) {
