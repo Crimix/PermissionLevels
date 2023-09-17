@@ -61,9 +61,9 @@ public class CommandBypassPlayerLimit {
                 setBypass(playerlist, gameprofile, canBypass);
                 ++i;
                 if (canBypass) {
-                    context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.PLAYER_BYPASS_ALLOWED.get(gameprofile.getName()), isModPresent(serverPlayerEntity)), true);
+                    context.getSource().sendSuccess(() -> TranslationUtil.createPossibleEagerTranslation(Translations.PLAYER_BYPASS_ALLOWED.get(gameprofile.getName()), isModPresent(serverPlayerEntity)), true);
                 } else {
-                    context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.PLAYER_BYPASS_DENIED.get(gameprofile.getName()), isModPresent(serverPlayerEntity)), true);
+                    context.getSource().sendSuccess(() -> TranslationUtil.createPossibleEagerTranslation(Translations.PLAYER_BYPASS_DENIED.get(gameprofile.getName()), isModPresent(serverPlayerEntity)), true);
                 }
             }
         }

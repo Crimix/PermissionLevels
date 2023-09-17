@@ -101,9 +101,9 @@ public class CommandOp {
                 addOp(playerlist, gameprofile, level, bypassPlayerLimit);
                 ++i;
                 if (bypassPlayerLimit && !bypassPlayerLimitBefore) {
-                    context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL_BYPASS.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
+                    context.getSource().sendSuccess(() -> TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL_BYPASS.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
                 } else {
-                    context.getSource().sendSuccess(TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
+                    context.getSource().sendSuccess(() -> TranslationUtil.createPossibleEagerTranslation(Translations.OP_WITH_LEVEL.get(gameprofile.getName(), level), isModPresent(serverPlayerEntity)), true);
                 }
             }
         }
